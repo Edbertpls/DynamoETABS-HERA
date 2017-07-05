@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtabsConnection", "EtabsConnection\EtabsConnection.csproj", "{9F44C3B9-6FA7-4A0D-BD78-93C658F0895A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETABSConnection", "EtabsConnection\ETABSConnection.csproj", "{9F44C3B9-6FA7-4A0D-BD78-93C658F0895A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoETABS", "DynamoETABS\DynamoETABS.csproj", "{8D37F11A-CEB4-4A0D-AB40-247E71BA964B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoETABS-TEST", "DynamoETABS-TEST\DynamoETABS-TEST.csproj", "{D00BFF37-BFE7-4914-88FE-88A50ABD2652}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{8D37F11A-CEB4-4A0D-AB40-247E71BA964B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D37F11A-CEB4-4A0D-AB40-247E71BA964B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D37F11A-CEB4-4A0D-AB40-247E71BA964B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D00BFF37-BFE7-4914-88FE-88A50ABD2652}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D00BFF37-BFE7-4914-88FE-88A50ABD2652}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D00BFF37-BFE7-4914-88FE-88A50ABD2652}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D00BFF37-BFE7-4914-88FE-88A50ABD2652}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

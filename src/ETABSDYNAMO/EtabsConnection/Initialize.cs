@@ -20,8 +20,9 @@ using Autodesk.DesignScript.Runtime;
 using System.Diagnostics;
 using System.Collections;
 
-namespace EtabsConnection
+namespace ETABSConnection
 {
+    [SupressImportIntoVM]
     public class Initialize
     {
         public static void InitializeSapModel(ref cOAPI myETABSObject, ref cSapModel myEtabsModel, string units)
@@ -55,15 +56,14 @@ namespace EtabsConnection
 
         }
 
-        public static String GetModelFilename (ref cSapModel myEtabsModel, ref string units)
+        public static string GetModelFilename (ref cSapModel myEtabsModel, ref string units)
         {
             return myEtabsModel.GetModelFilename();
         }
 
-        public static void OpenEtabsModel(String filepath, ref cSapModel myEtabsModel, ref string units)
+        public static void OpenEtabsModel(string filepath, ref cSapModel myEtabsModel, ref string units)
         {
             long ret = 0;
-            //Create ETABS Object 
 
             //Create API helper object
             ETABS2016.cHelper myHelper;
@@ -116,15 +116,5 @@ namespace EtabsConnection
                 Marshal.FinalReleaseComObject(Model);
             }
         }
-
-
-
-
-
-
-
-
-
-
     }
 }
