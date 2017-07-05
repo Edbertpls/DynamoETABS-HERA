@@ -1,0 +1,10 @@
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\bin\Debug\EtabsConnection.dll
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\bin\Debug\EtabsConnection.pdb
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\bin\Debug\DynamoServices.dll
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\bin\Debug\DynamoUnits.dll
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\bin\Debug\ETABS2016.dll
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\bin\Debug\NodeServices2.dll
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\bin\Debug\ProtoGeometry.dll
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\obj\Debug\EtabsConnection.csprojResolveAssemblyReference.cache
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\obj\Debug\EtabsConnection.dll
+D:\GITHUB\DynamoETABS-HERA\src\ETABSDYNAMO\EtabsConnection\obj\Debug\EtabsConnection.pdb
