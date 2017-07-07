@@ -1,0 +1,503 @@
+Option Explicit
+
+
+Dim myHelper As cHelper
+Dim myETABSObject As cOAPI
+Dim mySapModel As ETABS2016.cSapModel
+
+Dim NumberOfStories As Double
+
+
+Dim sPara As Worksheet
+Dim sModel As Worksheet
+
+Sub Open_ETABSmodel()
+
+'Attach to an existing instance of the program
+Dim AttachToInstance As Boolean
+AttachToInstance = False
+
+'Open ETABS throough Excel
+Dim ProgramPath As String
+ProgramPath = "C:\Program Files\Computers and Structures\ETABS 2016\ETABS.exe"
+
+'Full path to the model
+Dim ModelDirectory As String
+Dim ModelName As Variant
+Dim sfile As String
+
+ModelDirectory = Application.GetOpenFilename( _
+FileFilter:="ETABS MODEL, *.edb", Title:="Open ETABS Model")
+If ModelDirectory = "False" Then
+  MsgBox "No File Selected!"
+  Exit Sub
+Else
+  ModelName = Split(ModelDirectory, "\")
+  sfile = ModelName(UBound(ModelName))
+End If
+
+'dimension the ETABS Object as cOAPI type
+Dim myETABSObject As cOAPI
+Set myETABSObject = Nothing
+
+'Use ret to check return values of API calls
+Dim ret As Long
+If AttachToInstance Then
+  'attach to running instance of ETABS
+  Set myETABSObject = GetObject(, "CSI.ETABS.API.ETABSObject")
+Else
+  'Create new instance of ETABS
+  
+  'Create API helper object
+  Dim myHelper As cHelper
+  Set myHelper = New Helper
+  
+  'Create an instance of the ETABS object
+  Set myETABSObject = myHelper.CreateObject(ProgramPath)
+  'Start ETABS application
+  myETABSObject.ApplicationStart
+End If
+
+  Dim mySapModel As ETABS2016.cSapModel
+  Set mySapModel = myETABSObject.SapModel
+  
+  ret = mySapModel.File.OpenFile(ModelDirectory)
+  
+  Set mySapModel = Nothing
+  Set myETABSObject = Nothing
+
+  If ret = 0 Then
+    MsgBox "Open Success"
+  Else
+    MsgBox "Error Opening Model"
+  End If
+
+
+End Sub
+
+Sub newETABS_TEMPLATE()
+
+  Set sModel = ThisWorkbook.Sheets("Model")
+
+  'set the following flag to true to attach to an existing instance of the program
+  'otherwise a new instance of the program will be started
+    Dim AttachToInstance As Boolean
+    AttachToInstance = True
+
+  'full path to the program executable
+  'set it to the installation folder
+  'Note, the path below may need to be modified if you have ETABS installed in a different location
+    Dim ProgramPath As String
+    ProgramPath = "C:\Program Files\Computers and Structures\ETABS 2016\ETABS.exe"
+
+  'full path to the model
+  'set it to the desired path of your model
+    Dim ModelDirectory As String
+    ModelDirectory = "C:\Users\edbert\Desktop\Parametric - OAPI\TEST"
+    If Len(Dir(ModelDirectory, vbDirectory)) = 0 Then    'Check if directory exist
+      MkDir ModelDirectory                               'Create a directory for the model
+    End If
+
+    Dim ModelName As String
+    ModelName = "TEMPLATE_.edb"
+
+    Dim ModelPath As String
+    ModelPath = ModelDirectory & Application.PathSeparator & ModelName
+
+  'dimension the ETABS Object as cOAPI type - THE CLASS
+    Set myETABSObject = Nothing
+
+  'Use ret to check return values of API calls
+    Dim ret As Long
+
+    If AttachToInstance Then
+      'Create the OAPI object
+      Set myETABSObject = GetObject(, "CSI.ETABS.API.ETABSObject")
+    
+    Else
+    'create a new instance of ETABS
+    
+    'create API helper object
+    Set myHelper = New Helper
+
+    'create an instance of the ETABS object
+    Set myETABSObject = myHelper.CreateObject(ProgramPath)
+    'start ETABS application
+    myETABSObject.ApplicationStart
+    End If
+
+  'Get a reference to cSapModel to access all OAPI classes and functions
+    Set mySapModel = myETABSObject.SapModel
+
+  'Initialize new model with units
+    ret = mySapModel.InitializeNewModel(eUnits_kN_m_C)
+  
+  'Determine number of stories
+    NumberOfStories = sModel.Range("TotalStoreys").Value
+    
+  'Create model from template
+    ret = mySapModel.File.NewBlank()
+  
+  'Set Project Information data
+    ret = mySapModel.SetProjectInfo("Client Name", "")
+    ret = mySapModel.SetProjectInfo("Project Name", "ProjectName")
+    ret = mySapModel.SetProjectInfo("Project Number", "#######")
+    ret = mySapModel.SetProjectInfo("Company Name", "HERA ENGINEERING")
+    ret = mySapModel.SetProjectInfo("Company Logo", "")
+    ret = mySapModel.SetProjectInfo("Engineer", "Engineer")
+    ret = mySapModel.SetProjectInfo("Checker", "CHK")
+    ret = mySapModel.SetProjectInfo("Supervisor", "SPR")
+    ret = mySapModel.SetProjectInfo("Model Name", "")
+    ret = mySapModel.SetProjectInfo("Model Description", "")
+    ret = mySapModel.SetProjectInfo("Revision Number", "0")
+    ret = mySapModel.SetProjectInfo("Issue Number", "")
+
+  'Save model
+    ret = mySapModel.File.Save(ModelPath)
+
+  'Build Model
+    ETABS_build
+   
+  'Run analysis
+    Etabs_Analyze
+  
+  'Clean up variables
+  Set mySapModel = Nothing
+  Set myETABSObject = Nothing
+
+  If ret = 0 Then
+    MsgBox "API script completed successfully."
+  Else
+    MsgBox "API script FAILED to complete."
+  End If
+
+  Exit Sub
+
+ErrHandler:
+    MsgBox "Cannot run API script: " & Err.Description
+
+
+End Sub
+
+
+
+Sub newETABSmodel()
+
+  Set sModel = ThisWorkbook.Sheets("Model")
+  Set sPara = ThisWorkbook.Sheets("PARAMATER")
+
+  'set the following flag to true to attach to an existing instance of the program
+  'otherwise a new instance of the program will be started
+    Dim AttachToInstance As Boolean
+    AttachToInstance = True
+
+  'full path to the program executable
+  'set it to the installation folder
+  'Note, the path below may need to be modified if you have ETABS installed in a different location
+    Dim ProgramPath As String
+    ProgramPath = "C:\Program Files\Computers and Structures\ETABS 2016\ETABS.exe"
+
+  'full path to the model
+  'set it to the desired path of your model
+    Dim ModelDirectory As String
+    ModelDirectory = "C:\Users\edbert\Desktop\Parametric - OAPI\TEST"
+    If Len(Dir(ModelDirectory, vbDirectory)) = 0 Then    'Check if directory exist
+      MkDir ModelDirectory                               'Create a directory for the model
+    End If
+
+    Dim ModelName As String
+    ModelName = "TEST.edb"
+
+    Dim ModelPath As String
+    ModelPath = ModelDirectory & Application.PathSeparator & ModelName
+
+  'dimension the ETABS Object as cOAPI type - THE CLASS
+    Set myETABSObject = Nothing
+
+  'Use ret to check return values of API calls
+    Dim ret As Long
+
+    If AttachToInstance Then
+      'Create the OAPI object
+      Set myETABSObject = GetObject(, "CSI.ETABS.API.ETABSObject")
+    
+    Else
+    'create a new instance of ETABS
+    
+    'create API helper object
+    Set myHelper = New Helper
+
+    'create an instance of the ETABS object
+    Set myETABSObject = myHelper.CreateObject(ProgramPath)
+    'start ETABS application
+    myETABSObject.ApplicationStart
+  End If
+
+  'Get a reference to cSapModel to access all OAPI classes and functions
+    Set mySapModel = myETABSObject.SapModel
+
+  'Initialize new model with units
+    ret = mySapModel.InitializeNewModel(eUnits_kN_m_C)
+  
+  'Determine number of stories
+    NumberOfStories = sModel.Range("TotalStoreys").Value
+    
+  'Create model from template
+    ret = mySapModel.File.NewGridOnly(NumberOfStories, 3, 3, 1, 1, 24, 24)
+
+  'Save model
+    ret = mySapModel.File.Save(ModelPath)
+
+  'Build Model
+    ETABS_build
+   
+  'Run analysis
+    'Etabs_Analyze
+  
+  'Clean up variables
+  Set mySapModel = Nothing
+  Set myETABSObject = Nothing
+
+  If ret = 0 Then
+    MsgBox "API script completed successfully."
+  Else
+    MsgBox "API script FAILED to complete."
+  End If
+
+  Exit Sub
+
+ErrHandler:
+    MsgBox "Cannot run API script: " & Err.Description
+
+
+End Sub
+
+Sub ETABS_build()
+
+  Dim ret As Long
+  
+  Dim sPara As Worksheet
+  Set sPara = ThisWorkbook.Sheets("PARAMATER")
+  
+'Typical Storey Boundary Condition
+  Dim TypTotalStorey As Double
+    TypTotalStorey = sPara.Range("TypeNoStorey") + 1
+  
+  Dim TypStoreyStart As Double
+  TypStoreyStart = sPara.Range("TypStoreyStart")
+  
+  Dim TypStoreyEnd As Double
+  TypStoreyEnd = (TypStoreyStart + TypTotalStorey) - 2
+  
+  Dim TypFLH As Long
+  TypFLH = sPara.Range("TypFLH")
+  
+'Counters
+  Dim i As Integer ' Global Counter
+  Dim Ci As Double
+  Dim Fi As Double
+  Dim Bi As Double
+  Dim wi As Integer
+ 
+ 'Set Element Tables
+  Dim ColCoTbl As ListObject
+  Dim SlabCoTbl As ListObject
+  Dim WallCoTbl As ListObject
+  Dim BeamCoTbl As ListObject
+  
+  Set ColCoTbl = sPara.ListObjects("ColPoints")
+  'Set BeamCoTbl = SPara.ListObjects("BeamPoints")
+  Set SlabCoTbl = sPara.ListObjects("FPoints")
+  'Set WSlabCoTbl = sPara.ListObjects("")                   'Wet Area
+  'Set BSlabCoTbl = sPara.ListObjects("")                   'Balcony
+  Set WallCoTbl = sPara.ListObjects("WallPoints")
+  
+'Last Row Number
+  Dim ColLstval As Long
+    ColLstval = sPara.Range("B7").End(xlDown).Row
+    Debug.Print ColLstval
+    
+  'Dim BeamLstval As Long
+      'BeamLstval = sPara.Range("B7").End(xlDown).Row
+      'Debug.Print BeamLstval
+      
+    Dim WallLstval As Long
+      WallLstval = sPara.Range("K7").End(xlDown).Row
+      Debug.Print WallLstval
+      
+    Dim SlabLstval As Long
+      SlabLstval = sPara.Range("H7").End(xlDown).Row
+      Debug.Print SlabLstval
+      
+    Dim WSlabLstVal As Long
+      WSlabLstVal = sPara.Range("H7").End(xlDown).Row
+      
+'set Coordinate range
+    Dim CCoord As Range
+    Set CCoord = sPara.Range("B7:F" & ColLstval)
+  
+    'Dim BCoord As Range
+    'Set BCoord = sPara.Range("B7:F" & ColLstval)
+    
+    Dim WCoord As Range
+    Set WCoord = sPara.Range("K7:R" & WallLstval)
+  
+  Dim FCoord As Range
+    Set FCoord = sPara.Range("H7:I" & SlabLstval)
+    
+'Determine the number of rows in the range
+    Dim CTotalRows As Double
+    CTotalRows = CCoord.Rows.Count
+  
+    'Dim BTotalRows As Double
+    'BTotalRows = BCoord.Rows.Count
+    
+    Dim WTotalRows As Double
+    WTotalRows = WCoord.Rows.Count
+  
+    Dim FTotalRows As Double
+    FTotalRows = FCoord.Rows.Count
+    
+'Load Bearing Elements -
+'-------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+'Walls
+    Dim WX() As Double, WY() As Double, WZ() As Double, WName As String
+  
+  ReDim WX(4)
+  ReDim WY(4)
+  ReDim WZ(4)
+   
+    For i = TypStoreyStart To TypStoreyEnd
+      For wi = 1 To WTotalRows
+        WX(0) = (WCoord(wi, 3).Value): WY(0) = (WCoord(wi, 4).Value): WZ(0) = (i - 1) * TypFLH
+        WX(1) = (WCoord(wi, 6).Value): WY(1) = (WCoord(wi, 7).Value): WZ(1) = (i - 1) * TypFLH
+        WX(2) = (WCoord(wi, 6).Value): WY(2) = (WCoord(wi, 7).Value): WZ(2) = i * TypFLH
+        WX(3) = (WCoord(wi, 3).Value): WY(3) = (WCoord(wi, 4).Value): WZ(3) = i * TypFLH
+        WName = (WCoord(wi, 1).Value) & "-" & i
+    
+        ret = mySapModel.AreaObj.AddByCoord(4, WX, WY, WZ, WName, "Default", WName)
+        ret = mySapModel.View.RefreshView(0, False)
+      Next wi
+    Next i
+    
+  'Columns
+  Dim CX() As Double, CY() As Double, CZ As Double, CName() As String, Name As String
+  
+    ReDim CX(CTotalRows)
+    ReDim CY(CTotalRows)
+    ReDim CName(CTotalRows)
+  
+    For Ci = 1 To CTotalRows
+      CX(Ci) = (CCoord(Ci, 4).Value)
+      CY(Ci) = (CCoord(Ci, 5).Value)
+      CName(Ci) = (CCoord(Ci, 1).Value)
+    Next Ci
+    
+    For i = TypStoreyStart To TypStoreyEnd
+      For Ci = 1 To CTotalRows
+        CZ = (i - 1) * TypFLH
+        Name = CName(Ci) & "-" & i
+        ret = mySapModel.FrameObj.AddByCoord(CX(Ci), CY(Ci), CZ, CX(Ci), CY(Ci), i * 3, Name, "Default", Name)
+      Next Ci
+    ret = mySapModel.View.RefreshView(0, False)
+    Next i
+  
+  'Perimeter Beams
+      'For i = TypStoreyStart To TypStoreyEnd
+       ' For Fi = 2 To (FTotalRows)
+        '  CZCoord = Bi * 3
+         ' ret = mySapModel.FrameObj.AddByCoord(FX(Fi), FY(Fi), CZCoord, FX(Fi - 1), FY(Fi - 1), CZCoord, "Default")
+          'ret = mySapModel.FrameObj.AddByCoord(FX(1), FY(1), CZCoord, FX(FTotalRows), FY(FTotalRows), CZCoord, "Default")
+      'Next Fi
+    'ret = mySapModel.View.RefreshView(0, False)
+    'Next i
+    
+  'Beams
+      'For i = TypStoreyStart To TypStoreyEnd
+        'For Bi = 1 To (CTotalRows)
+          'CZCoord = Bi * 3
+          'ret = mySapModel.FrameObj.AddByCoord(CXCoord(Ci), CYCoord(Ci), CZCoord, CXCoord(Ci - 1), CYCoord(Ci - 1), CZCoord, "Default")
+          'ret = mySapModel.FrameObj.AddByCoord(CXCoord(1), CYCoord(1), CZCoord, CXCoord(CTotalRows), CYCoord(CTotalRows), CZCoord, "Default")
+      'Next Bi
+    'ret = mySapModel.View.RefreshView(0, False)
+    'Next i
+    
+  'SLAB
+  'Coordinates of point objects at the base of the building
+    Dim FX() As Double, FY() As Double, FZ() As Double, FName() As String
+    
+    ReDim FX(FTotalRows - 1)
+    ReDim FY(FTotalRows - 1)
+    ReDim FZ(FTotalRows - 1)
+    'ReDim FName(CTotalRows)
+    For Fi = 0 To FTotalRows - 1
+      FX(Fi) = (FCoord(Fi + 1, 1).Value)
+      FY(Fi) = (FCoord(Fi + 1, 2).Value)
+      'CName(Fi) = (FCoord(Ci, 1).Value)
+    Next Fi
+  
+    Dim XFlr() As Double, YFlr() As Double, ZFlr() As Double
+    ReDim XFlr(FTotalRows - 1)
+    ReDim YFlr(FTotalRows - 1)
+    ReDim ZFlr(FTotalRows - 1)
+    
+    For i = TypStoreyStart To TypStoreyEnd
+      For Fi = 0 To (FTotalRows - 1)
+        XFlr(Fi) = FX(Fi)
+        YFlr(Fi) = FY(Fi)
+        ZFlr(Fi) = i * TypFLH
+      Next Fi
+    ret = mySapModel.AreaObj.AddByCoord(FTotalRows - 1, XFlr, YFlr, ZFlr, "Slab1")
+    ret = mySapModel.View.RefreshView(0, False)
+    Next i
+  
+End Sub
+
+
+
+Sub Etabs_Analyze()
+
+  Dim NumberResults() As Long
+  Dim obj() As String
+  Dim Elm() As String
+  Dim F1() As Double
+  Dim F2() As Double
+  Dim F3() As Double
+  Dim M1() As Double
+  Dim M2() As Double
+  Dim M3() As Double
+  
+  
+  Dim ret As Long
+
+  'Set Load case to do not run
+    ret = mySapModel.Analyze.SetRunCaseFlag("Modal", True)
+  
+  'run analysis
+    ret = mySapModel.Analyze.RunAnalysis
+    
+  'set case output selections
+    ret = mySapModel.RESULTS.Setup.SetCaseSelectedForOutput("Dead")
+  
+  'Get Point Reaction
+    'ret = mySapModel.Results.JointReact("1", eItemTypeElm_ObjectElm, NumberResults)
+    
+  'Write reaction for column 1 back into worksheet
+    sModel.Range("F9:F9").Value = F3(0)
+
+End Sub
+
+
+Sub Etabs_close()
+
+  'Close ETABS
+    myETABSObject.ApplicationExit False
+    
+  'set the Objects to Nothing
+    Set mySapModel = Nothing
+    Set myETABSObject = Nothing
+    
+End Sub
+
+
